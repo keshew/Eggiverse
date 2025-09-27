@@ -1,8 +1,19 @@
 import SwiftUI
 
+struct FactModel: Identifiable {
+    var id = UUID().uuidString
+    var image: String
+    var detailImages: [String]
+    var title: String
+    var desc: String
+    var detailInfo: [String]
+    var type: String
+}
 struct QuizView: View {
     @StateObject var quizModel =  QuizViewModel()
-    @State private var selected = 0
+    @State private var selected = 1
+    @State var selectedFact = FactModel(image: "", detailImages: [""], title: "", desc: "", detailInfo: [""], type: "")
+    @State var isDetailFact = false
     let segments = ["Daily Qiiz", "Facts", "Bird Map"]
     
     var body: some View {
@@ -173,27 +184,27 @@ struct QuizView: View {
                 case 1:
                     ScrollView(showsIndicators: false) {
                         VStack {
-                            ForEach(0..<6, id: \.self) { index in
+                            ForEach(quizModel.contact.facts, id: \.id) { item in
                                 ZStack(alignment: .bottom) {
                                     ZStack(alignment: .top) {
                                         Rectangle()
                                             .fill(.white)
-                                            .frame(height: 275)
+                                            .frame(height: 305)
                                             .cornerRadius(12)
                                             .shadow(radius: 5)
                                         
                                         VStack {
                                             ZStack(alignment: .top) {
-                                                Image(.mockFact)
+                                                Image(item.image)
                                                     .resizable()
-                                                    .frame(height: 155)
+                                                    .frame(height: 175)
                                                 
                                                 HStack {
                                                     Rectangle()
                                                         .fill(.white)
                                                         .frame(width: 85, height: 30)
                                                         .overlay {
-                                                            Text("Anatomy")
+                                                            Text(item.type)
                                                                 .InterMedium(size: 14)
                                                         }
                                                         .cornerRadius(20)
@@ -207,10 +218,10 @@ struct QuizView: View {
                                             HStack {
                                                 VStack(alignment: .leading, spacing: 10) {
                                                     VStack(alignment: .leading, spacing: 15) {
-                                                        Text("The Perfect Protein")
+                                                        Text(item.title)
                                                             .InterBold(size: 16)
                                                         
-                                                        Text("25 mins")
+                                                        Text(item.desc)
                                                             .InterRegular(size: 12)
                                                     }
                                                 }
@@ -224,7 +235,8 @@ struct QuizView: View {
                                     
                                     HStack {
                                         Button(action: {
-                                            
+                                            selectedFact = item
+                                            isDetailFact = true
                                         }) {
                                             Rectangle()
                                                 .fill(.white)
@@ -444,6 +456,9 @@ struct QuizView: View {
                     }
                 }
             }
+        }
+        .fullScreenCover(isPresented: $isDetailFact) {
+            DetailFactView(fact: $selectedFact)
         }
     }
 }
