@@ -8,11 +8,23 @@ struct EggType: Identifiable, Hashable {
     var time: Int
 }
 
+struct RecipeModel: Identifiable {
+    var id = UUID().uuidString
+    var name: String
+    var image: String
+    var ingredients: String
+    var preparation: String
+    var category: [String]
+    var timePrepare: String
+    var difficulty: String
+}
+
 struct CookingView: View {
     @StateObject var cookingModel =  CookingViewModel()
-    @State private var selected = 0
+    @State private var selected = 1
+    @State var selectedRecipe = RecipeModel(name: "", image: "", ingredients: "", preparation: "", category: [""], timePrepare: "", difficulty: "")
+    @State var isDetailRecipe = false
     let segments = ["Timer", "Recipes", "Science"]
-    
     var eggs = [EggType(name: "Soft Boiled", desc: "Runny yolk, set white", color: Color(red: 248/255, green: 160/255, blue: 17/255), time: 360),
                 EggType(name: "Medium Boiled", desc: "Jammy yolk, firm white", color: Color(red: 242/255, green: 67/255, blue: 69/255), time: 480),
                 EggType(name: "Hard Boiled", desc: "Fully set yolk", color: Color(red: 230/255, green: 118/255, blue: 118/255), time: 600)]
@@ -25,7 +37,7 @@ struct CookingView: View {
                 Image(.cookLabel)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 300, height: 50)
+                    .frame(width: 300, height: 40)
                 
                 Text("Master the art of perfect eggs")
                     .InterMedium(size: 13)
@@ -121,111 +133,110 @@ struct CookingView: View {
                                     .cornerRadius(8)
                             }
                         }
+                        .padding(.top, 10)
                     }
                 case 1:
                     ScrollView(showsIndicators: false) {
-                        ZStack(alignment: .bottom) {
-                            ZStack(alignment: .top) {
-                                Rectangle()
-                                    .fill(.white)
-                                    .frame(height: 300)
-                                    .cornerRadius(12)
-                                    .shadow(radius: 5)
-                                
-                                VStack {
+                        VStack {
+                            ForEach(cookingModel.contact.recipes, id: \.id) { item in
+                                ZStack(alignment: .bottom) {
                                     ZStack(alignment: .top) {
-                                        Image(.mockFact)
-                                            .resizable()
-                                            .frame(height: 175)
+                                        Rectangle()
+                                            .fill(.white)
+                                            .frame(height: 300)
+                                            .cornerRadius(12)
+                                            .shadow(radius: 5)
                                         
-                                        HStack {
-                                            Spacer()
-                                            
-                                            Rectangle()
-                                                .fill(.white)
-                                                .frame(width: 85, height: 30)
-                                                .overlay {
-                                                    Text("Easy")
-                                                        .InterMedium(size: 14)
-                                                }
-                                                .cornerRadius(20)
-                                            
-                                        }
-                                        .padding(.horizontal)
-                                        .padding(.top)
-                                    }
-                                    
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 10) {
-                                            HStack {
-                                                Text("The Perfect Protein")
-                                                    .InterBold(size: 16)
+                                        VStack {
+                                            ZStack(alignment: .top) {
+                                                Image(item.image)
+                                                    .resizable()
+                                                    .frame(height: 175)
+                                                    .clipShape(RoundedCorner(radius: 12, corners: [.topLeft, .topRight]))
                                                 
-                                                Spacer()
-                                                
-                                                Text("25 mins")
-                                                    .InterRegular(size: 12)
-                                            }
-                                            
-                                            ScrollView(.horizontal ,showsIndicators: false) {
                                                 HStack {
-                                                    Rectangle()
-                                                        .fill(.white)
-                                                        .frame(width: 95, height: 25)
-                                                        .overlay {
-                                                            RoundedRectangle(cornerRadius: 20)
-                                                                .stroke(.black, lineWidth: 0.5)
-                                                                .overlay {
-                                                                    Text("With Seafood")
-                                                                        .InterRegular(size: 12)
-                                                                }
-                                                        }
-                                                        .cornerRadius(20)
+                                                    Spacer()
                                                     
                                                     Rectangle()
                                                         .fill(.white)
-                                                        .frame(width: 65, height: 25)
+                                                        .frame(width: 85, height: 30)
                                                         .overlay {
-                                                            RoundedRectangle(cornerRadius: 20)
-                                                                .stroke(.black, lineWidth: 0.5)
-                                                                .overlay {
-                                                                    Text("Classic")
-                                                                        .InterRegular(size: 12)
-                                                                }
+                                                            Text(item.difficulty)
+                                                                .InterMedium(size: 14)
                                                         }
                                                         .cornerRadius(20)
+                                                    
                                                 }
+                                                .padding(.horizontal)
+                                                .padding(.top)
                                             }
+                                            
+                                            HStack {
+                                                VStack(alignment: .leading, spacing: 10) {
+                                                    HStack {
+                                                        Text(item.name)
+                                                            .InterBold(size: 16)
+                                                        
+                                                        Spacer()
+                                                        
+                                                        Text(item.timePrepare)
+                                                            .InterRegular(size: 12)
+                                                    }
+                                                    
+                                                    ScrollView(.horizontal ,showsIndicators: false) {
+                                                        HStack {
+                                                            ForEach(item.category, id: \.self) { item in
+                                                                Rectangle()
+                                                                    .fill(.white)
+                                                                    .frame(width: 75, height: 25)
+                                                                    .overlay {
+                                                                        RoundedRectangle(cornerRadius: 20)
+                                                                            .stroke(.black, lineWidth: 0.5)
+                                                                            .overlay {
+                                                                                Text(item)
+                                                                                    .InterRegular(size: 12)
+                                                                            }
+                                                                    }
+                                                                    .cornerRadius(20)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                Spacer()
+                                            }
+                                            .padding(.horizontal)
+                                            .padding(.top, 5)
                                         }
-                                        
-                                        Spacer()
                                     }
-                                    .padding(.horizontal)
-                                    .padding(.top, 5)
-                                }
-                            }
-                            
-                            Button(action: {
-                                
-                            }) {
-                                Rectangle()
-                                    .fill(.white)
-                                    .frame(height: 35)
-                                    .overlay {
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(.black, lineWidth: 0.5)
+                                    
+                                    Button(action: {
+                                        selectedRecipe = item
+                                        isDetailRecipe = true
+                                        print("tapped")
+                                    }) {
+                                        Rectangle()
+                                            .fill(.white)
+                                            .frame(height: 35)
                                             .overlay {
-                                                Text("View Recipe")
-                                                    .InterBold(size: 14)
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .stroke(.black, lineWidth: 0.5)
+                                                    .overlay {
+                                                        Text("View Recipe")
+                                                            .InterBold(size: 14)
+                                                    }
                                             }
+                                            .cornerRadius(12)
                                     }
-                                    .cornerRadius(12)
                                     .padding(.bottom, 10)
                                     .padding(.horizontal)
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.top, 10)
                             }
+                            
+                            Color.clear.frame(height: 70)
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 10)
                     }
                 case 2:
                     ScrollView(showsIndicators: false) {
@@ -405,6 +416,9 @@ struct CookingView: View {
                 }
             }
         }
+        .fullScreenCover(isPresented: $isDetailRecipe) {
+            DetailRecipeView(recipe: $selectedRecipe)
+        }
     }
     
     func formatTime(_ seconds: Int) -> String {
@@ -416,4 +430,18 @@ struct CookingView: View {
 
 #Preview {
     CookingView()
+}
+
+struct RoundedCorner: Shape {
+    var radius: CGFloat = 0
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
+    }
 }

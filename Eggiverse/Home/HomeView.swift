@@ -2,7 +2,8 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject var homeModel =  HomeViewModel()
-
+    @Binding var selectedTab: CustomTabBar.TabType
+    
     var body: some View {
         ZStack {
             Color(red: 254/255, green: 250/255, blue: 233/255).ignoresSafeArea()
@@ -12,7 +13,7 @@ struct HomeView: View {
                     Image(.mainLabel)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 300, height: 50)
+                        .frame(width: 300, height: 40)
                     
                     Text("Your ideal helper for knowledge about eggs and birds.")
                         .InterMedium(size: 13)
@@ -125,7 +126,7 @@ struct HomeView: View {
                                         .multilineTextAlignment(.center)
                                     
                                     Button(action: {
-                                        
+                                        selectedTab = .Cooking
                                     }) {
                                         Rectangle()
                                             .fill(.white)
@@ -163,7 +164,7 @@ struct HomeView: View {
                                         .multilineTextAlignment(.center)
                                     
                                     Button(action: {
-                                        
+                                        selectedTab = .Quiz
                                     }) {
                                         Rectangle()
                                             .fill(.white)
@@ -237,7 +238,7 @@ struct HomeView: View {
                         .padding(.top)
                         .shadow(radius: 4)
                     
-                    Color.clear.frame(height: 60)
+                    Color.clear.frame(height: 70)
                 }
             }
         }
@@ -245,6 +246,6 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView()
+    HomeView(selectedTab: .constant(.Home))
 }
 
