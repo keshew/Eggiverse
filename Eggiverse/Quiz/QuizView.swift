@@ -11,7 +11,7 @@ struct FactModel: Identifiable {
 }
 struct QuizView: View {
     @StateObject var quizModel =  QuizViewModel()
-    @State private var selected = 1
+    @State private var selected = 0
     @State var selectedFact = FactModel(image: "", detailImages: [""], title: "", desc: "", detailInfo: [""], type: "")
     @State var isDetailFact = false
     let segments = ["Daily Qiiz", "Facts", "Bird Map"]
@@ -256,21 +256,19 @@ struct QuizView: View {
                                         Spacer()
                                         
                                         HStack(spacing: 15) {
-                                            Button(action: {
-                                                
-                                            }) {
+                                            ShareLink(item: item.desc) {
                                                 Image(.share)
                                                     .resizable()
                                                     .frame(width: 20, height: 20)
                                             }
                                             
-                                            Button(action: {
-                                                
-                                            }) {
-                                                Image(.download)
-                                                    .resizable()
-                                                    .frame(width: 20, height: 20)
-                                            }
+//                                            Button(action: {
+//                                                
+//                                            }) {
+//                                                Image(.download)
+//                                                    .resizable()
+//                                                    .frame(width: 20, height: 20)
+//                                            }
                                         }
                                     }
                                     .padding(.horizontal)

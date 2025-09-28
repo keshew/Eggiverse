@@ -1,8 +1,25 @@
 import SwiftUI
 
+struct EggFactModel: Identifiable {
+    var id = UUID().uuidString
+    var title: String
+    var desc: String
+    var imageName: String
+}
+
 struct HomeView: View {
     @StateObject var homeModel =  HomeViewModel()
     @Binding var selectedTab: CustomTabBar.TabType
+    @State private var threeIndices: [Int] = []
+    @State private var currentIndex: Int = 0
+    
+    func pickThreeUnique() {
+        var indicesSet = Set<Int>()
+        while indicesSet.count < 3 && indicesSet.count < homeModel.contact.eggFacts.count {
+            indicesSet.insert(Int.random(in: 0..<homeModel.contact.eggFacts.count))
+        }
+        threeIndices = Array(indicesSet)
+    }
     
     var body: some View {
         ZStack {
@@ -29,79 +46,88 @@ struct HomeView: View {
                             
                             VStack {
                                 ZStack(alignment: .top) {
-                                    Image(.mockFact)
-                                        .resizable()
-                                        .frame(height: 175)
+                                    if !homeModel.threeIndices.isEmpty {
+                                        let fact = homeModel.contact.eggFacts[homeModel.threeIndices[homeModel.currentIndex]]
+                                        Image(fact.imageName)
+                                            .resizable()
+                                            .frame(height: 175)
+                                            .cornerRadius(12)
+                                    }
                                     
                                     HStack {
                                         Button(action: {
-                                            
+                                            withAnimation {
+                                                homeModel.prevFact()
+                                            }
                                         }) {
                                             Rectangle()
-                                                .fill(.white)
+                                                .fill(Color.white)
                                                 .frame(width: 45, height: 30)
                                                 .overlay {
                                                     Image(systemName: "chevron.left")
-                                                        .foregroundStyle(.black)
+                                                        .foregroundColor(.black)
                                                 }
                                                 .cornerRadius(20)
-                                                .opacity(1)
                                         }
+                                        .opacity(homeModel.currentIndex == 0 ? 0.7 : 1)
+                                        .disabled(homeModel.currentIndex == 0)
                                         
                                         Spacer()
-                                        
                                         Rectangle()
-                                            .fill(.white)
+                                            .fill(Color.white.opacity(0.85))
                                             .frame(width: 85, height: 30)
-                                            .opacity(0.85)
                                             .overlay {
                                                 Text("Today’s Fact")
-                                                    .InterBold(size: 10)
+                                                    .fontWeight(.bold)
+                                                    .font(.system(size: 10))
                                             }
                                             .cornerRadius(8)
-                                        
-                                        
                                         Spacer()
-                                        
                                         Button(action: {
-                                            
+                                            withAnimation {
+                                                homeModel.nextFact()
+                                            }
                                         }) {
                                             Rectangle()
-                                                .fill(.white)
+                                                .fill(Color.white)
                                                 .frame(width: 45, height: 30)
                                                 .overlay {
                                                     Image(systemName: "chevron.right")
-                                                        .foregroundStyle(.black)
+                                                        .foregroundColor(.black)
                                                 }
                                                 .cornerRadius(20)
-                                                .opacity(1)
                                         }
-                                        
+                                        .opacity(homeModel.currentIndex == 2 ? 0.7 : 1)
+                                        .disabled(homeModel.currentIndex == 2)
                                     }
                                     .padding(.horizontal)
                                     .padding(.top)
                                 }
                                 
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        Text("The Perfect Protein")
-                                            .InterBold(size: 20)
-                                        
-                                        Text("The egg white is easily digested, and the yolk contains healthy fats, proteins, and vitamins.")
-                                            .InterRegular(size: 14)
-                                    }
+                                if !homeModel.threeIndices.isEmpty {
+                                    let fact = homeModel.contact.eggFacts[homeModel.threeIndices[homeModel.currentIndex]]
                                     
-                                    Spacer()
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 10) {
+                                            Text(fact.title)
+                                                .fontWeight(.bold)
+                                                .font(.system(size: 20))
+                                            
+                                            Text(fact.desc)
+                                                .font(.system(size: 14))
+                                        }
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.top, 5)
                                 }
-                                .padding(.horizontal)
-                                .padding(.top, 5)
                             }
                         }
-                 
+                        
                         HStack(spacing: 15) {
-                            ForEach(0..<3, id: \.self) { index in
+                            ForEach(0..<homeModel.threeIndices.count, id: \.self) { index in
                                 Circle()
-                                    .fill(.orange)
+                                    .fill(index == homeModel.currentIndex ? Color.orange : Color.gray.opacity(0.3))
                                     .frame(width: 10, height: 10)
                             }
                         }

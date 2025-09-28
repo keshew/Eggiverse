@@ -21,7 +21,7 @@ struct RecipeModel: Identifiable {
 
 struct CookingView: View {
     @StateObject var cookingModel =  CookingViewModel()
-    @State private var selected = 1
+    @State private var selected = 0
     @State var selectedRecipe = RecipeModel(name: "", image: "", ingredients: "", preparation: "", category: [""], timePrepare: "", difficulty: "")
     @State var isDetailRecipe = false
     let segments = ["Timer", "Recipes", "Science"]
