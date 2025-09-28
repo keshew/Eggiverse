@@ -223,4 +223,49 @@ struct QuizModel {
             type: "Behavior"
         )
     ]
+    
+    let quizData: [QuizQA] = [
+        QuizQA(question: "What is basically the shell of a chicken egg?", answers: ["Silicon", "Calcium carbonate", "Iron", "Sodium"], rightAnswerIndex: 1),
+        QuizQA(question: "Which part of the egg contains the most fat?", answers: ["Protein", "Yolk", "The shell", "The membrane"], rightAnswerIndex: 1),
+        QuizQA(question: "What vitamin in an egg helps to absorb calcium?", answers: ["Vitamin C", "Vitamin D", "Vitamin B12", "Vitamin K"], rightAnswerIndex: 1),
+        QuizQA(question: "Which eggshell color is more nutritious — white or brown?", answers: ["White", "Brown", "No, they are equally nutritious", "Green"], rightAnswerIndex: 2),
+        QuizQA(question: "What forms inside the egg and increases with age?", answers: ["A blood vessel", "Air chamber", "Yolk sac", "The protein shell"], rightAnswerIndex: 1),
+        QuizQA(question: "What happens to the protein when heated?", answers: ["It evaporates", "It denatures and hardens", "It's dissolving", "It turns into fat"], rightAnswerIndex: 1),
+        QuizQA(question: "What test can determine the freshness of an egg?", answers: ["Burn it with a candle", "Tapping on the shell", "Put it in the water", "Sniffing the shell"], rightAnswerIndex: 2),
+        QuizQA(question: "Why is it difficult to peel a fresh boiled egg?", answers: ["Liquid protein", "The protein is tightly attached to the inner shell", "The shell is too thick", "The yolk is soft"], rightAnswerIndex: 1),
+        QuizQA(question: "What element in an egg is good for the brain?", answers: ["Fluorine", "Choline", "Nitrogen", "Mercury"], rightAnswerIndex: 1),
+        QuizQA(question: "How many eggs can one ostrich egg replace?", answers: ["10–15", "25–30", "40–50", "5–7"], rightAnswerIndex: 2),
+
+        QuizQA(question: "Which is the largest bird in the world?", answers: ["Pelican", "Eagle", "Ostrich", "Flamingo"], rightAnswerIndex: 2),
+        QuizQA(question: "Which bird is the smallest?", answers: ["Sparrow", "Hummingbird bee", "Titmouse", "The Canary"], rightAnswerIndex: 1),
+        QuizQA(question: "Which bird has the largest wingspan?", answers: ["The Wandering Albatross", "The Eagle", "The frigate", "Pelican"], rightAnswerIndex: 0),
+        QuizQA(question: "Which bird is the fastest in diving?", answers: ["Peregrine Falcon", "Sokol-derbnik", "Eagle", "Swallow"], rightAnswerIndex: 0),
+        QuizQA(question: "Which bird makes the longest migrations?", answers: ["Swan", "Arctic tern", "Goose", "Crane"], rightAnswerIndex: 1),
+        QuizQA(question: "Which bird swims well but does not fly?", answers: ["The Penguin", "Flamingo", "The Loon", "Seagull"], rightAnswerIndex: 0),
+        QuizQA(question: "Which bird can turn its head almost 270°?", answers: ["Falcon", "Owl", "Parrot", "Crow"], rightAnswerIndex: 1),
+        QuizQA(question: "Which birds can imitate human speech?", answers: ["Tits", "Parrots and crows", "Swallows", "Pigeons"], rightAnswerIndex: 1),
+        QuizQA(question: "Which bird has a pink color because of its food?", answers: ["Flamingos", "Pelican", "The Heron", "Crane"], rightAnswerIndex: 0),
+        QuizQA(question: "Which bird was used as a postal bird?", answers: ["Pigeon", "Swallow", "Owl", "Seagull"], rightAnswerIndex: 0),
+
+        QuizQA(question: "Which bird is considered a symbol of wisdom?", answers: ["Eagle", "Owl", "Titmouse", "Goose"], rightAnswerIndex: 1),
+        QuizQA(question: "Which bird can imitate sounds and \"dance\"?", answers: ["Peacock", "The lyre bird", "Macaw parrot", "Toucan"], rightAnswerIndex: 1),
+        QuizQA(question: "Which bird lays the largest eggs?", answers: ["Ostrich", "Turkey", "Cassowary", "Swan"], rightAnswerIndex: 0),
+        QuizQA(question: "Which bird has the smallest eggs?", answers: ["Hummingbirds", "Titmouse", "Swallow", "Sparrow"], rightAnswerIndex: 0),
+        QuizQA(question: "Which bird can fly backwards?", answers: ["Hummingbirds", "Eagle", "Swallow", "Pigeon"], rightAnswerIndex: 0),
+        QuizQA(question: "Which bird dives to a depth of more than 500 m?", answers: ["The Imperial Penguin", "Cormorant", "The Albatross", "Kaira"], rightAnswerIndex: 0),
+        QuizQA(question: "Which birds build beautiful \"towers\" and decorated nests for the females?", answers: ["The Eagles", "Gardeners (bowerbirds)", "Swans", "The Jays"], rightAnswerIndex: 1),
+        QuizQA(question: "What kind of bird can fly for months without landing?", answers: ["Albatross", "Stork", "Pelican", "Crane"], rightAnswerIndex: 0),
+        QuizQA(question: "Which bird is the symbol of the USA?", answers: ["Bald Eagle", "Falcon", "Raven", "Turkey"], rightAnswerIndex: 0),
+        QuizQA(question: "Which bird is known for its melodious singing?", answers: ["The Starling", "The Nightingale", "The Canary", "The Lark"], rightAnswerIndex: 1),
+
+        QuizQA(question: "What part of the egg is used to create a shiny crust in baking?", answers: ["Protein", "Yolk", "The shell", "The membrane"], rightAnswerIndex: 0),
+        QuizQA(question: "What protects the egg from bacteria from the outside?", answers: ["Protein", "The yolk", "Cuticle (film)", "Air chamber"], rightAnswerIndex: 2),
+        QuizQA(question: "What is the name of the protein coagulation process during cooking?", answers: ["Fermentation", "Denaturation", "Caramelization", "Hydration"], rightAnswerIndex: 1),
+        QuizQA(question: "In which sauce are eggs a mandatory ingredient?", answers: ["Soy sauce", "Mayonnaise", "Barbecue", "Ketchup"], rightAnswerIndex: 1),
+        QuizQA(question: "How many micropores can there be on the shell of a chicken egg?", answers: ["100–200", "500–600", "Up to 17,000", "Not a single one"], rightAnswerIndex: 2),
+        QuizQA(question: "Which part of the egg contains all the essential amino acids?", answers: ["The shell", "Protein", "The yolk", "Air chamber"], rightAnswerIndex: 1),
+        QuizQA(question: "Which product is considered a reference in terms of amino acid composition?", answers: ["Beef", "Fish", "Egg", "Milk"], rightAnswerIndex: 2),
+        QuizQA(question: "Which yolk color is considered more useful?", answers: ["Light Yellow", "Any — depends only on the feed of the bird", "Bright orange", "White"], rightAnswerIndex: 1),
+        QuizQA(question: "In what condition does protein contain about 90% water?", answers: ["Dry powder", "Fresh egg white", "Boiled protein", "Frozen protein"], rightAnswerIndex: 1)
+    ]
 }

@@ -3,7 +3,8 @@ import SwiftUI
 struct CustomSegmentedControl: View {
     @Binding var selectedIndex: Int
     let titles: [String]
-
+    @Namespace private var animationNamespace
+    
     var body: some View {
         HStack(spacing: 0) {
             ForEach(titles.indices, id: \.self) { index in
@@ -24,7 +25,7 @@ struct CustomSegmentedControl: View {
                                         .fill(Color.white)
                                         .frame(height: 25)
                                         .padding(.horizontal, 5)
-                                        .matchedGeometryEffect(id: "highlight", in: Namespace().wrappedValue)
+                                        .matchedGeometryEffect(id: "highlight", in: animationNamespace)
                                 }
                             }
                         )

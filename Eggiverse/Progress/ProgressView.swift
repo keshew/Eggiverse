@@ -15,11 +15,43 @@ struct ProgressView: View {
     @StateObject var progressModel =  ProgressViewModel()
     @State private var selected = 0
     let segments = ["Personal", "Flock", "Awards"]
-    let achiv = [Achiev(image: "achiv1", title: "Golden Dozen", desc: "12 perfect eggs this week", currentProgress: 0, goalProgress: 12, isDone: true),
-                 Achiev(image: "achiv2", title: "Protein Pro", desc: "Met protein goals 7 days straight", currentProgress: 0, goalProgress: 7),
-                 Achiev(image: "hens", title: "Flock Master", desc: "Track 100 flock eggs", currentProgress: 0, goalProgress: 100),
-                 Achiev(image: "achiv4", title: "Consistency King", desc: "30-day tracking streak", currentProgress: 0, goalProgress: 30)]
+    @State var achiv = [Achiev(image: "achiv1", title: "Golden Dozen", desc: "12 perfect eggs this week", currentProgress: UserDefaultsManager.shared.totalEggsCount(for: "totalEggs"), goalProgress: 12),
+                 Achiev(image: "achiv2", title: "Protein Pro", desc: "Met protein goals 7 days straight", currentProgress: UserDefaultsManager.shared.consecutiveDaysEggs(for: "todayEggs"), goalProgress: 7),
+                 Achiev(image: "hens", title: "Flock Master", desc: "Track 100 flock eggs", currentProgress: UserDefaultsManager.shared.totalEggsCount(for: "totalEggs"), goalProgress: 100),
+                 Achiev(image: "achiv4", title: "Consistency King", desc: "30-day tracking streak", currentProgress: UserDefaultsManager.shared.consecutiveDaysEggs(for: "todayEggs"), goalProgress: 30)]
+    @State var eggConsumed = 0
+    @State var hensConsumed = 0
     
+    func updateAchievements(_ achievements: inout [Achiev]) {
+        for i in 0..<achievements.count {
+            let item = achievements[i]
+            switch item.title {
+            case "Golden Dozen":
+                let progress = UserDefaultsManager.shared.totalEggsCount(for: "todayEggs")
+                achievements[i].currentProgress = progress
+                achievements[i].isDone = progress >= 12
+
+            case "Protein Pro":
+                let streak = UserDefaultsManager.shared.consecutiveDaysEggs(for: "todayEggs")
+                achievements[i].currentProgress = streak
+                achievements[i].isDone = streak >= 7
+
+            case "Flock Master":
+                let progress = UserDefaultsManager.shared.totalEggsCount(for: "todayEggs")
+                achievements[i].currentProgress = progress
+                achievements[i].isDone = progress >= 100
+
+            case "Consistency King":
+                let streak = UserDefaultsManager.shared.consecutiveDaysEggs(for: "todayEggs")
+                achievements[i].currentProgress = streak
+                achievements[i].isDone = streak >= 30
+
+            default:
+                break
+            }
+        }
+    }
+
     var body: some View {
         ZStack {
             Color(red: 241/255, green: 246/255, blue: 255/255).ignoresSafeArea()
@@ -51,7 +83,7 @@ struct ProgressView: View {
                                                 .resizable()
                                                 .frame(width: 40, height: 40)
                                             
-                                            Text("18")
+                                            Text("\(UserDefaultsManager.shared.totalEggsForLastWeek())")
                                                 .InterBold(size: 24, color: .white)
                                             
                                             Text("Eggs This Week")
@@ -70,7 +102,7 @@ struct ProgressView: View {
                                                 .resizable()
                                                 .frame(width: 40, height: 40)
                                             
-                                            Text("95 g")
+                                            Text("\(UserDefaultsManager.shared.totalEggsForLastWeek() * 6) g")
                                                 .InterBold(size: 24, color: .white)
                                             
                                             Text("Protein Gained")
@@ -101,7 +133,9 @@ struct ProgressView: View {
                                                 .InterBold(size: 16)
                                             
                                             Button(action: {
-                                                
+                                                if eggConsumed > 0 {
+                                                    eggConsumed -= 1
+                                                }
                                             }) {
                                                 Rectangle()
                                                     .fill(.white)
@@ -118,11 +152,11 @@ struct ProgressView: View {
                                             }
                                             .padding(.leading, 5)
                                             
-                                            Text("2")
+                                            Text("\(eggConsumed)")
                                                 .InterBold(size: 18)
                                             
                                             Button(action: {
-                                                
+                                                eggConsumed += 1
                                             }) {
                                                 Rectangle()
                                                     .fill(.white)
@@ -146,7 +180,7 @@ struct ProgressView: View {
                                                 .fill(Color(red: 255/255, green: 241/255, blue: 191/255))
                                                 .overlay {
                                                     VStack {
-                                                        Text("12 g")
+                                                        Text("\(eggConsumed * 6) g")
                                                             .InterBold(size: 18, color: Color(red: 197/255, green: 166/255, blue: 58/255))
                                                         
                                                         Text("Protein")
@@ -161,7 +195,7 @@ struct ProgressView: View {
                                                 .fill(Color(red: 249/255, green: 161/255, blue: 161/255))
                                                 .overlay {
                                                     VStack {
-                                                        Text("140kk")
+                                                        Text("\(eggConsumed * 70)kk")
                                                             .InterBold(size: 18, color: Color(red: 190/255, green: 91/255, blue: 91/255))
                                                         
                                                         Text("Calories")
@@ -175,7 +209,7 @@ struct ProgressView: View {
                                                 .fill(Color(red: 243/255, green: 186/255, blue: 186/255))
                                                 .overlay {
                                                     VStack {
-                                                        Text("10 g")
+                                                        Text("\(eggConsumed * 5) g")
                                                             .InterBold(size: 18, color: Color(red: 190/255, green: 91/255, blue: 91/255))
                                                         
                                                         Text("Fat")
@@ -186,15 +220,21 @@ struct ProgressView: View {
                                                 .cornerRadius(12)
                                         }
                                         
-                                        Rectangle()
-                                            .fill(Color(red: 42/255, green: 140/255, blue: 241/255))
-                                            .overlay {
-                                                Text("+ Log Entry")
-                                                    .InterBold(size: 14, color: .white)
-                                                .padding(.horizontal)
-                                            }
-                                            .frame(height: 40)
-                                            .cornerRadius(12)
+                                        Button(action: {
+                                            UserDefaultsManager.shared.addEggsCount(eggConsumed, for: "todayEggs")
+                                            UserDefaultsManager.shared.addXP(10)
+                                            eggConsumed = 0
+                                        }) {
+                                            Rectangle()
+                                                .fill(Color(red: 42/255, green: 140/255, blue: 241/255))
+                                                .overlay {
+                                                    Text("+ Log Entry")
+                                                        .InterBold(size: 14, color: .white)
+                                                        .padding(.horizontal)
+                                                }
+                                                .frame(height: 40)
+                                                .cornerRadius(12)
+                                        }
                                     }
                                     .padding(.horizontal)
                                 }
@@ -225,7 +265,7 @@ struct ProgressView: View {
                                                 .resizable()
                                                 .frame(width: 40, height: 40)
                                             
-                                            Text("8")
+                                            Text("\(UserDefaultsManager.shared.totalHensCount())")
                                                 .InterBold(size: 24, color: .white)
                                             
                                             Text("Active Hens")
@@ -244,7 +284,7 @@ struct ProgressView: View {
                                                 .resizable()
                                                 .frame(width: 40, height: 40)
                                             
-                                            Text("77")
+                                            Text("\(UserDefaultsManager.shared.totalEggsForLastWeek())")
                                                 .InterBold(size: 24, color: .white)
                                             
                                             Text("Weekly Total")
@@ -271,7 +311,9 @@ struct ProgressView: View {
                                                 .InterBold(size: 16)
                                             
                                             Button(action: {
-                                                
+                                                if eggConsumed > 0 {
+                                                    eggConsumed -= 1
+                                                }
                                             }) {
                                                 Rectangle()
                                                     .fill(.white)
@@ -288,11 +330,11 @@ struct ProgressView: View {
                                             }
                                             .padding(.leading, 5)
                                             
-                                            Text("2")
+                                            Text("\(eggConsumed)")
                                                 .InterBold(size: 18)
                                             
                                             Button(action: {
-                                                
+                                                eggConsumed += 1
                                             }) {
                                                 Rectangle()
                                                     .fill(.white)
@@ -311,15 +353,21 @@ struct ProgressView: View {
                                             Spacer()
                                         }
                                         
-                                        Rectangle()
-                                            .fill(Color(red: 41/255, green: 204/255, blue: 31/255))
-                                            .overlay {
-                                                Text("+ Record Collection")
-                                                    .InterBold(size: 14, color: .white)
-                                                .padding(.horizontal)
-                                            }
-                                            .frame(height: 40)
-                                            .cornerRadius(12)
+                                        Button(action: {
+                                            UserDefaultsManager.shared.addEggsCount(eggConsumed, for: "todayEggs")
+                                            UserDefaultsManager.shared.addXP(7)
+                                            eggConsumed = 0
+                                        }) {
+                                            Rectangle()
+                                                .fill(Color(red: 41/255, green: 204/255, blue: 31/255))
+                                                .overlay {
+                                                    Text("+ Record Collection")
+                                                        .InterBold(size: 14, color: .white)
+                                                        .padding(.horizontal)
+                                                }
+                                                .frame(height: 40)
+                                                .cornerRadius(12)
+                                        }
                                     }
                                     .padding(.horizontal)
                                 }
@@ -345,7 +393,9 @@ struct ProgressView: View {
                                                 .InterBold(size: 16)
                                             
                                             Button(action: {
-                                                
+                                                if hensConsumed > 0 {
+                                                    hensConsumed -= 1
+                                                }
                                             }) {
                                                 Rectangle()
                                                     .fill(.white)
@@ -362,11 +412,11 @@ struct ProgressView: View {
                                             }
                                             .padding(.leading, 5)
                                             
-                                            Text("2")
+                                            Text("\(hensConsumed)")
                                                 .InterBold(size: 18)
                                             
                                             Button(action: {
-                                                
+                                                    hensConsumed += 1
                                             }) {
                                                 Rectangle()
                                                     .fill(.white)
@@ -385,15 +435,21 @@ struct ProgressView: View {
                                             Spacer()
                                         }
                                         
-                                        Rectangle()
-                                            .fill(Color(red: 41/255, green: 204/255, blue: 31/255))
-                                            .overlay {
-                                                Text("+ Record Hens")
-                                                    .InterBold(size: 14, color: .white)
-                                                .padding(.horizontal)
-                                            }
-                                            .frame(height: 40)
-                                            .cornerRadius(12)
+                                        Button(action: {
+                                            UserDefaultsManager.shared.addHensCount(hensConsumed, for: "hens_today")
+                                            UserDefaultsManager.shared.addXP(10)
+                                            hensConsumed = 0
+                                        }) {
+                                            Rectangle()
+                                                .fill(Color(red: 41/255, green: 204/255, blue: 31/255))
+                                                .overlay {
+                                                    Text("+ Record Hens")
+                                                        .InterBold(size: 14, color: .white)
+                                                        .padding(.horizontal)
+                                                }
+                                                .frame(height: 40)
+                                                .cornerRadius(12)
+                                        }
                                     }
                                     .padding(.horizontal)
                                 }
@@ -460,6 +516,11 @@ struct ProgressView: View {
                                     .fill(.white)
                                     .overlay {
                                         VStack {
+                                            let currentXP = UserDefaultsManager.shared.getXP()
+                                            let currentLevel = UserDefaultsManager.shared.getLevel()
+                                            let maxXPPerLevel = 1500
+                                            let xpInCurrentLevel = currentXP % maxXPPerLevel
+                                            
                                             HStack {
                                                 Text("Your Progress")
                                                     .InterRegular(size: 18)
@@ -474,7 +535,7 @@ struct ProgressView: View {
                                                     .fill(Color(red: 254/255, green: 160/255, blue: 233/255).opacity(0.5))
                                                     .overlay {
                                                         VStack(spacing: 5) {
-                                                            Text("Level 5")
+                                                            Text("Level \(currentLevel + 1)")
                                                                 .InterBold(size: 18, color: Color(red: 203/255, green: 17/255, blue: 183/255))
                                                             
                                                             Text("Egg Enthusiast")
@@ -490,7 +551,7 @@ struct ProgressView: View {
                                                     .fill(Color(red: 42/255, green: 140/255, blue: 241/255).opacity(0.15))
                                                     .overlay {
                                                         VStack(spacing: 5) {
-                                                            Text("1345")
+                                                            Text("\(currentXP)")
                                                                 .InterBold(size: 18, color: Color(red: 42/255, green: 140/255, blue: 241/255))
                                                             
                                                             Text("Total XP")
@@ -505,25 +566,16 @@ struct ProgressView: View {
                                             
                                             VStack(spacing: 10) {
                                                 HStack {
-                                                    Text("Progress to Level 6")
+                                                    Text("Progress to Level \(currentLevel + 2)")
                                                         .InterRegular(size: 14)
                                                     
                                                     Spacer()
                                                     
-                                                    Text("847 / 1500 XP")
+                                                    Text("\(xpInCurrentLevel) / \(maxXPPerLevel) XP")
                                                         .InterRegular(size: 14)
                                                 }
                                                 
-                                                ZStack(alignment: .leading) {
-                                                    Rectangle()
-                                                        .fill(Color(red: 217/255, green: 217/255, blue: 217/255))
-                                                        .frame(height: 12)
-                                                        .cornerRadius(20)
-                                                    
-                                                    Rectangle()
-                                                        .frame(width: 300, height: 12)
-                                                        .cornerRadius(20)
-                                                }
+                                                XPProgressBar(currentXP: currentXP)
                                             }
                                         }
                                         .padding()
@@ -534,6 +586,9 @@ struct ProgressView: View {
                             }
                             
                             Color.clear.frame(height: 70)
+                        }
+                        .onAppear {
+                            updateAchievements(&achiv)
                         }
                         .padding(.horizontal)
                         .padding(.top, 10)
@@ -551,7 +606,7 @@ struct ProgressView: View {
                                                 .resizable()
                                                 .frame(width: 40, height: 40)
                                             
-                                            Text("18")
+                                            Text("\(UserDefaultsManager.shared.totalEggsForLastWeek())")
                                                 .InterBold(size: 24, color: .white)
                                             
                                             Text("Eggs This Week")
@@ -570,7 +625,7 @@ struct ProgressView: View {
                                                 .resizable()
                                                 .frame(width: 40, height: 40)
                                             
-                                            Text("95 g")
+                                            Text("\(UserDefaultsManager.shared.totalEggsForLastWeek() * 6) g")
                                                 .InterBold(size: 24, color: .white)
                                             
                                             Text("Protein Gained")
@@ -601,7 +656,9 @@ struct ProgressView: View {
                                                 .InterBold(size: 16)
                                             
                                             Button(action: {
-                                                
+                                                if eggConsumed > 0 {
+                                                    eggConsumed -= 1
+                                                }
                                             }) {
                                                 Rectangle()
                                                     .fill(.white)
@@ -618,11 +675,11 @@ struct ProgressView: View {
                                             }
                                             .padding(.leading, 5)
                                             
-                                            Text("2")
+                                            Text("\(eggConsumed)")
                                                 .InterBold(size: 18)
                                             
                                             Button(action: {
-                                                
+                                                eggConsumed += 1
                                             }) {
                                                 Rectangle()
                                                     .fill(.white)
@@ -646,7 +703,7 @@ struct ProgressView: View {
                                                 .fill(Color(red: 255/255, green: 241/255, blue: 191/255))
                                                 .overlay {
                                                     VStack {
-                                                        Text("12 g")
+                                                        Text("\(eggConsumed * 6) g")
                                                             .InterBold(size: 18, color: Color(red: 197/255, green: 166/255, blue: 58/255))
                                                         
                                                         Text("Protein")
@@ -661,7 +718,7 @@ struct ProgressView: View {
                                                 .fill(Color(red: 249/255, green: 161/255, blue: 161/255))
                                                 .overlay {
                                                     VStack {
-                                                        Text("140kk")
+                                                        Text("\(eggConsumed * 70)kk")
                                                             .InterBold(size: 18, color: Color(red: 190/255, green: 91/255, blue: 91/255))
                                                         
                                                         Text("Calories")
@@ -675,7 +732,7 @@ struct ProgressView: View {
                                                 .fill(Color(red: 243/255, green: 186/255, blue: 186/255))
                                                 .overlay {
                                                     VStack {
-                                                        Text("10 g")
+                                                        Text("\(eggConsumed * 5) g")
                                                             .InterBold(size: 18, color: Color(red: 190/255, green: 91/255, blue: 91/255))
                                                         
                                                         Text("Fat")
@@ -686,15 +743,21 @@ struct ProgressView: View {
                                                 .cornerRadius(12)
                                         }
                                         
-                                        Rectangle()
-                                            .fill(Color(red: 42/255, green: 140/255, blue: 241/255))
-                                            .overlay {
-                                                Text("+ Log Entry")
-                                                    .InterBold(size: 14, color: .white)
-                                                .padding(.horizontal)
-                                            }
-                                            .frame(height: 40)
-                                            .cornerRadius(12)
+                                        Button(action: {
+                                            UserDefaultsManager.shared.addEggsCount(eggConsumed, for: "todayEggs")
+                                            UserDefaultsManager.shared.addXP(10)
+                                            eggConsumed = 0
+                                        }) {
+                                            Rectangle()
+                                                .fill(Color(red: 42/255, green: 140/255, blue: 241/255))
+                                                .overlay {
+                                                    Text("+ Log Entry")
+                                                        .InterBold(size: 14, color: .white)
+                                                        .padding(.horizontal)
+                                                }
+                                                .frame(height: 40)
+                                                .cornerRadius(12)
+                                        }
                                     }
                                     .padding(.horizontal)
                                 }
@@ -707,6 +770,8 @@ struct ProgressView: View {
                             WeeklyBarChartView()
                             
                             NutritionDonutChart()
+                            
+                            Color.clear.frame(height: 60)
                         }
                         .padding()
                     }
@@ -721,7 +786,7 @@ struct ProgressView: View {
 }
 
 struct WeeklyBarChartView: View {
-    let data = [4, 3, 5, 2, 6, 4, 3]
+    let data = UserDefaultsManager.shared.valuesForLast7Days()
     let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     
     var maxValue: Int {
@@ -740,6 +805,9 @@ struct WeeklyBarChartView: View {
                     HStack(alignment: .bottom, spacing: 18) {
                         ForEach(data.indices, id: \.self) { index in
                             VStack {
+                                let safeMax = maxValue > 0 ? maxValue : 1
+                                let safeValue = max(data[index], 0)
+                                
                                 Text("\(data[index])")
                                     .InterRegular(size: 12)
                                 
@@ -747,7 +815,7 @@ struct WeeklyBarChartView: View {
                                     .fill(Color(red: 242/255, green: 255/255, blue: 141/255))
                                     .frame(
                                         width: 24,
-                                        height: CGFloat(data[index]) / CGFloat(maxValue) * 100
+                                        height: CGFloat(safeValue) / CGFloat(safeMax) * 100
                                     )
                                 
                                 Text(days[index])
@@ -770,9 +838,9 @@ struct WeeklyBarChartView: View {
 }
 
 struct NutritionDonutChart: View {
-    let data: [Double] = [35, 28, 12, 25]
     let colors: [Color] = [Color(red: 242/255, green: 67/255, blue: 69/255), Color(red: 41/255, green: 204/255, blue: 31/255),
                            Color(red: 242/255, green: 255/255, blue: 141/255), Color(red: 42/255, green: 140/255, blue: 241/255)]
+    let data: [Double] = [35, 28, 12, 25]
     let labels: [String] = ["Protein 35%", "Healthy Fats 28%", "Minerals 12%", "Vitamins 25%"]
 
     var body: some View {
@@ -851,7 +919,7 @@ struct DonutChart: View {
 }
 
 struct EggsCharts: View {
-    let data = [4, 3, 5, 2, 6, 4, 3]
+    let data: [Int] = UserDefaultsManager.shared.valuesForLast7Days(filterKeyPrefix: "hens")
     let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     
     var maxValue: Int {
@@ -863,19 +931,23 @@ struct EggsCharts: View {
             .fill(Color.white)
             .overlay {
                 VStack(alignment: .leading, spacing: 0) {
+                  
                     
                     HStack(alignment: .bottom, spacing: 18) {
                         ForEach(data.indices, id: \.self) { index in
                             VStack {
+                                let safeMax = maxValue > 0 ? maxValue : 1
+                                let safeValue = max(data[index], 0)
+                                
                                 Text("\(data[index])")
                                     .InterRegular(size: 12)
                                 
                                 Rectangle()
                                     .fill(Color(red: 156/255, green: 236/255, blue: 150/255))
-                                    .frame(
-                                        width: 24,
-                                        height: CGFloat(data[index]) / CGFloat(maxValue) * 100
-                                    )
+                                .frame(
+                                    width: 24,
+                                    height: CGFloat(safeValue) / CGFloat(safeMax) * 100
+                                )
                                 
                                 Text(days[index])
                                     .font(.caption2)
@@ -893,5 +965,221 @@ struct EggsCharts: View {
             .padding(.horizontal, 30)
             .shadow(radius: 5)
             .padding(.top, 10)
+    }
+}
+
+class UserDefaultsManager {
+    static let shared = UserDefaultsManager()
+    private let key = "intDictWithDate"
+    private let xpKey = "userXP"
+    
+     var userDefaults: UserDefaults {
+        UserDefaults.standard
+    }
+
+    func totalEggsCount(for key: String) -> Int {
+         let dict = getDict()
+         return dict[key]?.count ?? 0
+     }
+
+     func consecutiveDaysEggs(for key: String) -> Int {
+         let dict = getDict()
+         let calendar = Calendar.current
+         
+         let dates = dict.filter { $0.key == key && $0.value.count > 0 }
+             .map { calendar.startOfDay(for: $0.value.date) }
+             .sorted(by: >)
+         
+         guard !dates.isEmpty else { return 0 }
+         
+         var streak = 1
+         for i in 1..<dates.count {
+             let previousDay = calendar.date(byAdding: .day, value: -1, to: dates[i-1])!
+             if dates[i] == previousDay {
+                 streak += 1
+             } else {
+                 break
+             }
+         }
+         return streak
+     }
+    
+    func totalHensCount() -> Int {
+        let dict = getDict()
+        let hensValues = dict.filter { $0.key.hasPrefix("hens") }
+        return hensValues.reduce(0) { $0 + $1.value.count }
+    }
+    
+    private func groupedByDay(filterKeyPrefix: String? = nil) -> [Date: Int] {
+        let dict = getDict()
+        let calendar = Calendar.current
+
+        var dayCounts: [Date: Int] = [:]
+        for (key, value) in dict {
+            if let prefix = filterKeyPrefix, !key.hasPrefix(prefix) {
+                continue
+            }
+            let day = calendar.startOfDay(for: value.date)
+            dayCounts[day, default: 0] += value.count
+        }
+        return dayCounts
+    }
+
+    func valuesForLast7Days(filterKeyPrefix: String? = nil) -> [Int] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        let dayCounts = groupedByDay(filterKeyPrefix: filterKeyPrefix)
+        var results: [Int] = []
+
+        for i in 0..<7 {
+            if let date = calendar.date(byAdding: .day, value: -i, to: today) {
+                let count = dayCounts[date] ?? 0
+                results.append(count)
+            }
+        }
+        return results.reversed()
+    }
+
+    func addHensCount(_ amount: Int, for key: String) {
+        var dict = getDict()
+        if let current = dict[key] {
+            let newCount = current.count + amount
+            dict[key] = (newCount, Date())
+        } else {
+            dict[key] = (amount, Date())
+        }
+        saveDict(dict)
+    }
+
+    private func saveDict(_ dict: [String: (count: Int, date: Date)]) {
+        let encoded = dict.mapValues { ["count": $0.count, "date": $0.date.timeIntervalSince1970] }
+        userDefaults.set(encoded, forKey: key)
+    }
+
+    private func getDict() -> [String: (count: Int, date: Date)] {
+        guard let saved = userDefaults.dictionary(forKey: key) as? [String: [String: Double]] else {
+            return [:]
+        }
+
+        var dict: [String: (count: Int, date: Date)] = [:]
+        for (k, v) in saved {
+            let count = Int(v["count"] ?? 0)
+            let time = v["date"] ?? 0
+            dict[k] = (count, Date(timeIntervalSince1970: time))
+        }
+        return dict
+    }
+
+    func incrementValue(for key: String, by amount: Int) {
+        var dict = getDict()
+        if let current = dict[key] {
+            let newCount = current.count + amount
+            let newDate = Date()
+            dict[key] = (newCount, newDate)
+        } else {
+            dict[key] = (amount, Date())
+        }
+        saveDict(dict)
+    }
+
+    private func groupedByDay() -> [Date: Int] {
+        let dict = getDict()
+        let calendar = Calendar.current
+
+        var dayCounts: [Date: Int] = [:]
+        for (_, value) in dict {
+            let day = calendar.startOfDay(for: value.date)
+            dayCounts[day, default: 0] += value.count
+        }
+        return dayCounts
+    }
+
+    func valuesForLast7Days() -> [Int] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        let dayCounts = groupedByDay()
+        var results: [Int] = []
+
+        for i in 0..<7 {
+            if let date = calendar.date(byAdding: .day, value: -i, to: today) {
+                let count = dayCounts[date] ?? 0
+                results.append(count)
+            }
+        }
+
+        return results.reversed()
+    }
+
+    func value(for key: String) -> Int {
+        let dict = getDict()
+        return dict[key]?.count ?? 0
+    }
+    
+    func addEggsCount(_ amount: Int, for key: String) {
+        var dict = getDict()
+        if let current = dict[key] {
+            let newCount = current.count + amount
+            dict[key] = (newCount, Date())
+        } else {
+            dict[key] = (amount, Date())
+        }
+        saveDict(dict)
+    }
+    
+    func totalEggsForLastWeek() -> Int {
+        let last7daysValues = valuesForLast7Days()
+        return last7daysValues.reduce(0, +)
+    }
+}
+
+extension UserDefaultsManager {
+    func addXP(_ amount: Int) {
+        let currentXP = getXP()
+        let newXP = currentXP + amount
+        userDefaults.set(newXP, forKey: xpKey)
+    }
+
+    func getXP() -> Int {
+        userDefaults.integer(forKey: xpKey)
+    }
+
+    func getLevel(maxXPPerLevel: Int = 1500) -> Int {
+        let xp = getXP()
+        return xp / maxXPPerLevel
+    }
+
+    func getProgressToNextLevel(maxXPPerLevel: Int = 1500) -> Double {
+        let xp = getXP()
+        let remainder = xp % maxXPPerLevel
+        return Double(remainder) / Double(maxXPPerLevel)
+    }
+}
+
+struct XPProgressBar: View {
+    let currentXP: Int
+    let maxXPPerLevel: Int = 1500
+    let maxWidth: CGFloat = 340
+
+    var progressInCurrentLevel: Int {
+        currentXP % maxXPPerLevel
+    }
+
+    var progressWidth: CGFloat {
+        maxWidth * CGFloat(progressInCurrentLevel) / CGFloat(maxXPPerLevel)
+    }
+
+    var body: some View {
+        ZStack(alignment: .leading) {
+            Rectangle()
+                .fill(Color(red: 217/255, green: 217/255, blue: 217/255))
+                .frame(width: maxWidth, height: 12)
+                .cornerRadius(20)
+
+            Rectangle()
+                .frame(width: progressWidth, height: 12)
+                .cornerRadius(20)
+        }
     }
 }

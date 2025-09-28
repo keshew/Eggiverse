@@ -12,6 +12,7 @@ struct SplashView: View {
     @State var arraySplashItems = [SplashItem(image: "splashImg1", title: "Learn Fun Facts", desc: "Discover surprising facts about eggs and birds every day."),
                                    SplashItem(image: "splashImg2", title: "Daily Quizzes", desc: "Challenge yourself and test your knowledge."),
                                    SplashItem(image: "splashImg3", title: "Cooking Guide", desc: "Make perfect eggs with smart timers and tips.")]
+    @State var isTab = false
     var body: some View {
         ZStack {
             Color(red: 254/255, green: 250/255, blue: 233/255).ignoresSafeArea()
@@ -71,7 +72,7 @@ struct SplashView: View {
                     .padding(.top, 50)
                     
                     Button(action: {
-                        
+                        isTab = true
                     }) {
                         Rectangle()
                             .fill(Color(red: 248/255, green: 160/255, blue: 17/255))
@@ -86,6 +87,9 @@ struct SplashView: View {
                 }
                 .padding()
             }
+        }
+        .fullScreenCover(isPresented: $isTab) {
+            TabBarView()
         }
     }
 }

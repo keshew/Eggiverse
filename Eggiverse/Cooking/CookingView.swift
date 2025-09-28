@@ -28,6 +28,12 @@ struct CookingView: View {
     var eggs = [EggType(name: "Soft Boiled", desc: "Runny yolk, set white", color: Color(red: 248/255, green: 160/255, blue: 17/255), time: 360),
                 EggType(name: "Medium Boiled", desc: "Jammy yolk, firm white", color: Color(red: 242/255, green: 67/255, blue: 69/255), time: 480),
                 EggType(name: "Hard Boiled", desc: "Fully set yolk", color: Color(red: 230/255, green: 118/255, blue: 118/255), time: 600)]
+    @State var selectedEgg = EggType(name: "Soft Boiled", desc: "Runny yolk, set white", color: Color(red: 248/255, green: 160/255, blue: 17/255), time: 360)
+    
+    @State private var remainingTime: Int = 0
+    @State private var timerRunning = false
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    @State private var isPaused = false
     
     var body: some View {
         ZStack {
@@ -55,37 +61,122 @@ struct CookingView: View {
                                 VStack {
                                     Circle()
                                         .fill(LinearGradient(colors: [Color(red: 255/255, green: 227/255, blue: 127/255),
-                                                                      Color(red: 255/255, green: 199/255, blue: 113/255)], startPoint: .top, endPoint: .bottom))
+                                                                      Color(red: 255/255, green: 199/255, blue: 113/255)],
+                                                             startPoint: .top, endPoint: .bottom))
                                         .frame(width: 120, height: 120)
                                         .overlay {
-                                            //                                        Text("5:58")
-                                            //                                            .InterBold(size: 32, color: Color(red: 148/255, green: 28/255, blue: 27/255))
-                                            
-                                            Image(.egg)
-                                                .resizable()
-                                                .frame(width: 100, height: 100)
+                                            if timerRunning {
+                                                Text(formatTime(remainingTime))
+                                                    .font(.system(size: 32, weight: .bold))
+                                                    .foregroundColor(Color(red: 148/255, green: 28/255, blue: 27/255))
+                                                    .frame(width: 120, height: 120)
+                                            } else {
+                                                Image("egg")
+                                                    .resizable()
+                                                    .frame(width: 100, height: 100)
+                                                
+                                            }
                                         }
                                     
                                     Spacer()
                                     
                                     ZStack(alignment: .leading) {
                                         Rectangle()
-                                            .frame(height: 20)
+                                            .frame(width: 340, height: 20)
                                             .cornerRadius(20)
+                                             
+                                        Rectangle()
+                                            .fill(.orange)
+                                            .frame(
+                                                width: timerRunning
+                                                    ? max(0, CGFloat(selectedEgg.time - remainingTime) / CGFloat(selectedEgg.time) * 330)
+                                                    : 0,
+                                                height: 15
+                                            )
+                                            .cornerRadius(20)
+                                            .padding(.horizontal, 5)
+                                            .animation(.linear(duration: 1), value: remainingTime)
                                     }
                                     
                                     VStack {
-                                        Text("Soft Boiled")
-                                            .InterBold(size: 16)
+                                        Text(selectedEgg.name)
+                                            .font(.system(size: 16, weight: .bold))
                                         
-                                        Text("Runny yolk, set white")
-                                            .InterRegular(size: 14)
+                                        Text(selectedEgg.desc)
+                                            .font(.system(size: 14))
+                                        
                                     }
                                     .padding(.top, 5)
-                                    Spacer()
-                                    Text("Select an egg type to start cooking")
-                                        .InterRegular(size: 14)
                                     
+                                    Spacer()
+                                    
+                                    if !timerRunning {
+                                        Text("Select an egg type to start cooking")
+                                            .font(.system(size: 14))
+                                    }
+                                    
+                                    HStack(spacing: 50) {
+                                        if timerRunning && !isPaused {
+                                            Button(action: {
+                                                isPaused = true
+                                            }) {
+                                                Rectangle()
+                                                    .fill(.orange)
+                                                    .cornerRadius(8)
+                                                    .frame(width: 90, height: 35)
+                                                    .overlay {
+                                                        HStack {
+                                                            Image(systemName: "pause.fill")
+                                                                .foregroundColor(.white)
+                                                            Text("Pause")
+                                                                .InterMedium(size: 14, color: .white)
+                                                        }
+                                                    }
+                                            }
+                                        } else if timerRunning && isPaused {
+                                            Button(action: {
+                                                isPaused = false
+                                            }) {
+                                                Rectangle()
+                                                    .fill(.orange)
+                                                    .cornerRadius(8)
+                                                    .frame(width: 90, height: 35)
+                                                    .overlay {
+                                                        HStack {
+                                                            Image(systemName: "play.fill")
+                                                                .foregroundColor(.white)
+                                                            Text("Resume")
+                                                                .InterMedium(size: 14, color: .white)
+                                                        }
+                                                    }
+                                            }
+                                        }
+                                        
+                                        if timerRunning {
+                                            Button(action: {
+                                                timerRunning = false
+                                                isPaused = false
+                                                remainingTime = selectedEgg.time
+                                            }) {
+                                            Rectangle()
+                                                .fill(.white)
+                                                .cornerRadius(8)
+                                                .frame(width: 90, height: 35)
+                                                .overlay {
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .stroke(Color.gray, lineWidth: 0.7)
+                                                        .overlay {
+                                                            HStack {
+                                                                Image(systemName: "arrow.clockwise")
+                                                                    .foregroundColor(.black)
+                                                                Text("Reset")
+                                                                    .InterMedium(size: 14)
+                                                            }
+                                                        }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 .padding()
                             }
@@ -95,45 +186,60 @@ struct CookingView: View {
                             .padding(.top, 10)
                             .shadow(radius: 5)
                         
-                        VStack {
+                        VStack(spacing: 15) {
                             ForEach(eggs, id: \.self) { item in
-                                Rectangle()
-                                    .fill(.white)
-                                    .frame(height: 50)
-                                    .overlay {
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(.gray, lineWidth: 0.5)
-                                            .overlay {
-                                                HStack {
-                                                    Circle()
-                                                        .fill(item.color)
-                                                        .frame(width: 25, height: 25)
-                                                    
-                                                    VStack(alignment: .leading) {
-                                                        Text(item.name)
-                                                            .InterBold(size: 14)
-                                                        
-                                                        Text(item.desc)
-                                                            .InterRegular(size: 12)
-                                                    }
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Image(.clock)
-                                                        .resizable()
-                                                        .frame(width: 25, height: 25)
-                                                    
-                                                    Text(formatTime(item.time))
-                                                        .InterBold(size: 14)
-                                                }
-                                                .padding(.horizontal)
-                                            }
+                                Button(action: {
+                                    withAnimation {
+                                        selectedEgg = item
+                                        remainingTime = item.time
+                                        timerRunning = true
                                     }
-                                    .padding(.horizontal)
-                                    .cornerRadius(8)
+                                }) {
+                                    Rectangle()
+                                        .fill(.white)
+                                        .frame(height: 50)
+                                        .overlay {
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray, lineWidth: 0.5)
+                                                .overlay {
+                                                    HStack {
+                                                        Circle()
+                                                            .fill(item.color)
+                                                            .frame(width: 25, height: 25)
+                                                        
+                                                        VStack(alignment: .leading) {
+                                                            Text(item.name)
+                                                                .InterBold(size: 14)
+                                                            Text(item.desc)
+                                                                .InterRegular(size: 12)
+                                                        }
+                                                        
+                                                        Spacer()
+                                                        
+                                                        Image("clock")
+                                                            .resizable()
+                                                            .frame(width: 25, height: 25)
+                                                        
+                                                        Text(formatTime(item.time))
+                                                            .InterBold(size: 14)
+                                                    }
+                                                    .padding(.horizontal)
+                                                }
+                                        }
+                                        .cornerRadius(8)
+                                        .padding(.horizontal)
+                                }
                             }
                         }
                         .padding(.top, 10)
+                    }
+                    .onReceive(timer) { _ in
+                        if timerRunning && !isPaused && remainingTime > 0 {
+                            remainingTime -= 1
+                        } else if remainingTime == 0 {
+                            timerRunning = false
+                            UserDefaultsManager.shared.addXP(100)
+                        }
                     }
                 case 1:
                     ScrollView(showsIndicators: false) {
@@ -143,7 +249,7 @@ struct CookingView: View {
                                     ZStack(alignment: .top) {
                                         Rectangle()
                                             .fill(.white)
-                                            .frame(height: 300)
+                                            .frame(height: UIScreen.main.bounds.width > 600 ? 500 : 300)
                                             .cornerRadius(12)
                                             .shadow(radius: 5)
                                         
@@ -151,7 +257,7 @@ struct CookingView: View {
                                             ZStack(alignment: .top) {
                                                 Image(item.image)
                                                     .resizable()
-                                                    .frame(height: 175)
+                                                    .frame(height: UIScreen.main.bounds.width > 600 ? 375 : 175)
                                                     .clipShape(RoundedCorner(radius: 12, corners: [.topLeft, .topRight]))
                                                 
                                                 HStack {
@@ -213,7 +319,7 @@ struct CookingView: View {
                                     Button(action: {
                                         selectedRecipe = item
                                         isDetailRecipe = true
-                                        print("tapped")
+                                        UserDefaultsManager.shared.addXP(10)
                                     }) {
                                         Rectangle()
                                             .fill(.white)
@@ -334,37 +440,122 @@ struct CookingView: View {
                                 VStack {
                                     Circle()
                                         .fill(LinearGradient(colors: [Color(red: 255/255, green: 227/255, blue: 127/255),
-                                                                      Color(red: 255/255, green: 199/255, blue: 113/255)], startPoint: .top, endPoint: .bottom))
+                                                                      Color(red: 255/255, green: 199/255, blue: 113/255)],
+                                                             startPoint: .top, endPoint: .bottom))
                                         .frame(width: 120, height: 120)
                                         .overlay {
-                                            //                                        Text("5:58")
-                                            //                                            .InterBold(size: 32, color: Color(red: 148/255, green: 28/255, blue: 27/255))
-                                            
-                                            Image(.egg)
-                                                .resizable()
-                                                .frame(width: 100, height: 100)
+                                            if timerRunning {
+                                                Text(formatTime(remainingTime))
+                                                    .font(.system(size: 32, weight: .bold))
+                                                    .foregroundColor(Color(red: 148/255, green: 28/255, blue: 27/255))
+                                                    .frame(width: 120, height: 120)
+                                            } else {
+                                                Image("egg")
+                                                    .resizable()
+                                                    .frame(width: 100, height: 100)
+                                                
+                                            }
                                         }
                                     
                                     Spacer()
                                     
                                     ZStack(alignment: .leading) {
                                         Rectangle()
-                                            .frame(height: 20)
+                                            .frame(width: 340, height: 20)
                                             .cornerRadius(20)
+                                             
+                                        Rectangle()
+                                            .fill(.orange)
+                                            .frame(
+                                                width: timerRunning
+                                                    ? max(0, CGFloat(selectedEgg.time - remainingTime) / CGFloat(selectedEgg.time) * 330)
+                                                    : 0,
+                                                height: 15
+                                            )
+                                            .cornerRadius(20)
+                                            .padding(.horizontal, 5)
+                                            .animation(.linear(duration: 1), value: remainingTime)
                                     }
                                     
                                     VStack {
-                                        Text("Soft Boiled")
-                                            .InterBold(size: 16)
+                                        Text(selectedEgg.name)
+                                            .font(.system(size: 16, weight: .bold))
                                         
-                                        Text("Runny yolk, set white")
-                                            .InterRegular(size: 14)
+                                        Text(selectedEgg.desc)
+                                            .font(.system(size: 14))
+                                        
                                     }
                                     .padding(.top, 5)
-                                    Spacer()
-                                    Text("Select an egg type to start cooking")
-                                        .InterRegular(size: 14)
                                     
+                                    Spacer()
+                                    
+                                    if !timerRunning {
+                                        Text("Select an egg type to start cooking")
+                                            .font(.system(size: 14))
+                                    }
+                                    
+                                    HStack(spacing: 50) {
+                                        if timerRunning && !isPaused {
+                                            Button(action: {
+                                                isPaused = true
+                                            }) {
+                                                Rectangle()
+                                                    .fill(.orange)
+                                                    .cornerRadius(8)
+                                                    .frame(width: 90, height: 35)
+                                                    .overlay {
+                                                        HStack {
+                                                            Image(systemName: "pause.fill")
+                                                                .foregroundColor(.white)
+                                                            Text("Pause")
+                                                                .InterMedium(size: 14, color: .white)
+                                                        }
+                                                    }
+                                            }
+                                        } else if timerRunning && isPaused {
+                                            Button(action: {
+                                                isPaused = false
+                                            }) {
+                                                Rectangle()
+                                                    .fill(.orange)
+                                                    .cornerRadius(8)
+                                                    .frame(width: 90, height: 35)
+                                                    .overlay {
+                                                        HStack {
+                                                            Image(systemName: "play.fill")
+                                                                .foregroundColor(.white)
+                                                            Text("Resume")
+                                                                .InterMedium(size: 14, color: .white)
+                                                        }
+                                                    }
+                                            }
+                                        }
+                                        
+                                        if timerRunning {
+                                            Button(action: {
+                                                timerRunning = false
+                                                isPaused = false
+                                                remainingTime = selectedEgg.time
+                                            }) {
+                                            Rectangle()
+                                                .fill(.white)
+                                                .cornerRadius(8)
+                                                .frame(width: 90, height: 35)
+                                                .overlay {
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .stroke(Color.gray, lineWidth: 0.7)
+                                                        .overlay {
+                                                            HStack {
+                                                                Image(systemName: "arrow.clockwise")
+                                                                    .foregroundColor(.black)
+                                                                Text("Reset")
+                                                                    .InterMedium(size: 14)
+                                                            }
+                                                        }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 .padding()
                             }
@@ -374,43 +565,59 @@ struct CookingView: View {
                             .padding(.top, 10)
                             .shadow(radius: 5)
                         
-                        VStack {
+                        VStack(spacing: 15) {
                             ForEach(eggs, id: \.self) { item in
-                                Rectangle()
-                                    .fill(.white)
-                                    .frame(height: 50)
-                                    .overlay {
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(.gray, lineWidth: 0.5)
-                                            .overlay {
-                                                HStack {
-                                                    Circle()
-                                                        .fill(item.color)
-                                                        .frame(width: 25, height: 25)
-                                                    
-                                                    VStack(alignment: .leading) {
-                                                        Text(item.name)
-                                                            .InterBold(size: 14)
-                                                        
-                                                        Text(item.desc)
-                                                            .InterRegular(size: 12)
-                                                    }
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Image(.clock)
-                                                        .resizable()
-                                                        .frame(width: 25, height: 25)
-                                                    
-                                                    Text(formatTime(item.time))
-                                                        .InterBold(size: 14)
-                                                }
-                                                .padding(.horizontal)
-                                            }
+                                Button(action: {
+                                    withAnimation {
+                                        selectedEgg = item
+                                        remainingTime = item.time
+                                        timerRunning = true
                                     }
-                                    .padding(.horizontal)
-                                    .cornerRadius(8)
+                                }) {
+                                    Rectangle()
+                                        .fill(.white)
+                                        .frame(height: 50)
+                                        .overlay {
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray, lineWidth: 0.5)
+                                                .overlay {
+                                                    HStack {
+                                                        Circle()
+                                                            .fill(item.color)
+                                                            .frame(width: 25, height: 25)
+                                                        
+                                                        VStack(alignment: .leading) {
+                                                            Text(item.name)
+                                                                .InterBold(size: 14)
+                                                            Text(item.desc)
+                                                                .InterRegular(size: 12)
+                                                        }
+                                                        
+                                                        Spacer()
+                                                        
+                                                        Image("clock")
+                                                            .resizable()
+                                                            .frame(width: 25, height: 25)
+                                                        
+                                                        Text(formatTime(item.time))
+                                                            .InterBold(size: 14)
+                                                    }
+                                                    .padding(.horizontal)
+                                                }
+                                        }
+                                        .cornerRadius(8)
+                                        .padding(.horizontal)
+                                }
                             }
+                        }
+                        .padding(.top, 10)
+                    }
+                    .onReceive(timer) { _ in
+                        if timerRunning && !isPaused && remainingTime > 0 {
+                            remainingTime -= 1
+                        } else if remainingTime == 0 {
+                            timerRunning = false
+                            UserDefaultsManager.shared.addXP(100)
                         }
                     }
                 }
@@ -435,7 +642,7 @@ struct CookingView: View {
 struct RoundedCorner: Shape {
     var radius: CGFloat = 0
     var corners: UIRectCorner = .allCorners
-
+    
     func path(in rect: CGRect) -> Path {
         let path = UIBezierPath(
             roundedRect: rect,

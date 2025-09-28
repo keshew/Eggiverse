@@ -40,7 +40,7 @@ struct HomeView: View {
                         ZStack(alignment: .top) {
                             Rectangle()
                                 .fill(Color(red: 254/255, green: 250/255, blue: 233/255))
-                                .frame(height: 300)
+                                .frame(height: UIScreen.main.bounds.width > 600 ? 500 : 300)
                                 .cornerRadius(12)
                                 .shadow(radius: 5)
                             
@@ -50,7 +50,7 @@ struct HomeView: View {
                                         let fact = homeModel.contact.eggFacts[homeModel.threeIndices[homeModel.currentIndex]]
                                         Image(fact.imageName)
                                             .resizable()
-                                            .frame(height: 175)
+                                            .frame(height: UIScreen.main.bounds.width > 600 ? 375 : 175)
                                             .cornerRadius(12)
                                     }
                                     
@@ -228,7 +228,7 @@ struct HomeView: View {
                                 
                                 HStack {
                                     VStack {
-                                        Text("26")
+                                        Text("\(UserDefaultsManager.shared.totalEggsForLastWeek())")
                                             .InterBold(size: 22, color: Color(red: 248/255, green: 160/255, blue: 17/255))
                                         
                                         Text("Perfect eggs")
@@ -238,17 +238,17 @@ struct HomeView: View {
                                     Spacer()
                                     
                                     VStack {
-                                        Text("12")
+                                        Text("\(UserDefaultsManager.shared.getGamesPlayed())")
                                             .InterBold(size: 22, color: Color(red: 41/255, green: 204/255, blue: 31/255))
                                         
-                                        Text("Quiz Streak")
+                                        Text("Quiz Played")
                                             .InterMedium(size: 14)
                                     }
                                     
                                     Spacer()
                                     
                                     VStack {
-                                        Text("48")
+                                        Text("\(UserDefaultsManager.shared.getFactsRead())")
                                             .InterBold(size: 22, color: Color(red: 42/255, green: 140/255, blue: 241/255))
                                         
                                         Text("Facts Learned")
@@ -275,3 +275,33 @@ struct HomeView: View {
     HomeView(selectedTab: .constant(.Home))
 }
 
+extension UserDefaultsManager {
+    private var gamesPlayedKey: String { "gamesPlayed" }
+    private var factsReadKey: String { "factsRead" }
+
+    func saveGamesPlayed(_ count: Int) {
+        userDefaults.set(count, forKey: gamesPlayedKey)
+    }
+
+    func getGamesPlayed() -> Int {
+        userDefaults.integer(forKey: gamesPlayedKey)
+    }
+
+    func incrementGamesPlayed(by amount: Int = 1) {
+        let newCount = getGamesPlayed() + amount
+        saveGamesPlayed(newCount)
+    }
+
+    func saveFactsRead(_ count: Int) {
+        userDefaults.set(count, forKey: factsReadKey)
+    }
+
+    func getFactsRead() -> Int {
+        userDefaults.integer(forKey: factsReadKey)
+    }
+
+    func incrementFactsRead(by amount: Int = 1) {
+        let newCount = getFactsRead() + amount
+        saveFactsRead(newCount)
+    }
+}
